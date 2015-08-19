@@ -26,6 +26,7 @@ import com.orientechnologies.orient.core.metadata.schema.OClass;
 import com.orientechnologies.orient.core.record.impl.ODocument;
 import com.orientechnologies.orient.etl.OETLProcessHaltedException;
 import com.orientechnologies.orient.etl.OETLProcessor;
+import com.orientechnologies.orient.core.storage.ORecordDuplicatedException;
 import com.tinkerpop.blueprints.impls.orient.OrientEdge;
 import com.tinkerpop.blueprints.impls.orient.OrientVertex;
 
@@ -168,18 +169,22 @@ public class OEdgeTransformer extends OAbstractLookupTransformer {
 
       // CREATE THE EDGE
       final OrientEdge edge;
-      if (directionOut)
-        edge = (OrientEdge) vertex.addEdge(edgeClass, targetVertex);
-      else
-        edge = (OrientEdge) targetVertex.addEdge(edgeClass, vertex);
+      try {
+        if (directionOut)
+          edge = (OrientEdge) vertex.addEdge(edgeClass, targetVertex);
+        else
+          edge = (OrientEdge) targetVertex.addEdge(edgeClass, vertex);
+        if (edgeFields != null) {
+          for (String f : edgeFields.fieldNames())
+            edge.setProperty(f, resolve(edgeFields.field(f)));
+        }
 
-      if (edgeFields != null) {
-        for (String f : edgeFields.fieldNames())
-          edge.setProperty(f, resolve(edgeFields.field(f)));
+        log(OETLProcessor.LOG_LEVELS.DEBUG, "created new edge=%s", edge);
+        return edge;
+      } catch (ORecordDuplicatedException orde) {
+        log(OETLProcessor.LOG_LEVELS.DEBUG, "edge already exists");
       }
 
-      log(OETLProcessor.LOG_LEVELS.DEBUG, "created new edge=%s", edge);
-      return edge;
     }
 
     return null;
