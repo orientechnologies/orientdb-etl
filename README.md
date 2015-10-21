@@ -1,3 +1,14 @@
+# Project MOVED
+
+OrientDB ETL has been moved to OrientDB core modules: https://github.com/orientechnologies/orientdb/tree/develop/etl
+
+ 
+
+
+
+
+
+
 # ETL
 
 The OrientDB-ETL module is an amazing tool to move data from and to OrientDB by executing an [ETL process](http://en.wikipedia.org/wiki/Extract,_transform,_load). It's super easy to use. OrientDB ETL is based on the following principles:
